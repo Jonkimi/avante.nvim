@@ -185,16 +185,40 @@ function H.refresh_token(async, force)
     end
   end
 
+  --- 辅助函数：处理 curl 调用失败（基于您的参考代码）
+  --- @param err_obj any pcall 返回的错误对象
+  --- @return boolean # true 如果是已处理的 spawn 错误, false 如果是其他错误
+  local function handle_curl_pcall_error(err_obj)
+    local err = tostring(err_obj)
+    if err:find("Failed to spawn process") then
+      local reason = err:gsub('pid = "(.*)"', "%1")
+      vim.pretty_print("Failed to spawn curl: " .. reason)
+      return true -- 表示这是一个已知的、已处理的错误
+    end
+    return false -- 表示这是其他未预料到的错误
+  end
+
   if async then
-    curl.get(
-      H.chat_auth_url,
-      vim.tbl_deep_extend("force", {
-        callback = handle_response,
-      }, curl_opts)
-    )
+    local curl_params = vim.tbl_deep_extend("force", {
+      callback = handle_response,
+    }, curl_opts)
+
+    local ok, err_obj = pcall(curl.get, H.chat_auth_url, curl_params)
+
+    if not ok then
+      if not handle_curl_pcall_error(err_obj) then
+        -- 如果不是已知的 spawn 错误，则抛出原始错误
+        error(err_obj)
+      end
+    end
   else
-    local response = curl.get(H.chat_auth_url, curl_opts)
-    handle_response(response)
+    local ok, response_or_err = pcall(curl.get, H.chat_auth_url, curl_opts)
+    if not ok then
+      if not handle_curl_pcall_error(response_or_err) then
+        error(response_or_err)
+      end
+    end
+    handle_response(response_or_err)
   end
 end
 
