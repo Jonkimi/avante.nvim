@@ -185,17 +185,16 @@ function H.refresh_token(async, force)
     end
   end
 
-  --- 辅助函数：处理 curl 调用失败（基于您的参考代码）
-  --- @param err_obj any pcall 返回的错误对象
-  --- @return boolean # true 如果是已处理的 spawn 错误, false 如果是其他错误
+  --- @param err_obj any pcall
+  --- @return boolean # true if is a spawn error, false if is other error 
   local function handle_curl_pcall_error(err_obj)
     local err = tostring(err_obj)
     if err:find("Failed to spawn process") then
       local reason = err:gsub('pid = "(.*)"', "%1")
       vim.pretty_print("Failed to spawn curl: " .. reason)
-      return true -- 表示这是一个已知的、已处理的错误
+      return true
     end
-    return false -- 表示这是其他未预料到的错误
+    return false
   end
 
   if async then
@@ -207,7 +206,6 @@ function H.refresh_token(async, force)
 
     if not ok then
       if not handle_curl_pcall_error(err_obj) then
-        -- 如果不是已知的 spawn 错误，则抛出原始错误
         error(err_obj)
       end
     end
