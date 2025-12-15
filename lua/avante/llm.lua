@@ -524,6 +524,7 @@ function M.curl(opts)
     if orig_on_stop then return orig_on_stop(stop_opts) end
   end
 
+
   local spec = provider:parse_curl_args(prompt_opts)
   if not spec then
     handler_opts.on_stop({ reason = "error", error = "Provider configuration error" })
@@ -1696,6 +1697,8 @@ function M._stream(opts)
   ---@cast provider AvanteProviderFunctor
 
   local prompt_opts = M.generate_prompts(opts)
+  -- TODO add session id
+  prompt_opts.session_id = opts.session_id
 
   if
     prompt_opts.pending_compaction_history_messages

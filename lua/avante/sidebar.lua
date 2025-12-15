@@ -2851,6 +2851,8 @@ function Sidebar:handle_submit(request)
       on_state_change = on_state_change,
       acp_client = self.acp_client,
       on_save_acp_client = function(client) self.acp_client = client end,
+      -- TODO
+      session_id = self.chat_history.session_id,
       acp_session_id = self.chat_history.acp_session_id,
       on_save_acp_session_id = function(session_id)
         self.chat_history.acp_session_id = session_id
